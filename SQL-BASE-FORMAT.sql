@@ -1,0 +1,42 @@
+-- create database xxxxxxx;
+-- use xxxxxxx;
+-- create table artist (
+-- 	Artist_ID INT PRIMARY KEY auto_increment,
+--     Artist_Name VARCHAR(50),
+--     Up_Date DATE
+-- );
+-- CREATE TABLE works (
+-- 	Artist_ID INT,
+--     Title VARCHAR(255),
+--     Rating DECIMAL (3, 2),
+--     Score VARCHAR (20),
+--     Source VARCHAR (20),
+--     Foreign key(Artist_ID) references artist(Artist_ID)
+-- );
+-- alter table artist modify column Artist_ID int auto_increment unique;
+-- alter table artist modify column Artist_Name VARCHAR(50) unique not null;
+-- alter table works rename column score to Code;
+-- SET AUTOCOMMIT = OFF;
+-- commit;
+
+-- DELIMITER //
+-- CREATE PROCEDURE get_table()
+-- BEGIN
+--     SELECT 
+--         Artist.Artist_ID, 
+--         Artist.Artist_Name, 
+--         Artist.Up_Date, 
+--         Works.Title, 
+--         Works.Rating, 
+--         Works.Code, 
+--         Works.Source
+--     FROM 
+--         Artist
+--     LEFT JOIN 
+--         Works
+--     ON 
+--         Artist.Artist_ID = Works.Artist_ID;
+-- END //
+-- DELIMITER ;
+-- commit;
+call get_table();
