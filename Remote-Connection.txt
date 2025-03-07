@@ -1,0 +1,116 @@
+ip a
+ping 192.168.1.20
+ip route show | grep default
+nmap -sn 192.168.1.0/24
+
+
+
+
+
+**Steps to Access MySQL Database from Another Computer on the Same Network**
+
+### **1. Configure MySQL Server to Accept Remote Connections**
+
+#### **Step 1: Edit MySQL Configuration File**
+1. Open the MySQL configuration file:
+   ```bash
+   sudo nano /etc/my.cnf
+   ```
+   or
+   ```bash
+   sudo nano /etc/mysql/mysql.conf.d/mysqld.cnf
+   ```
+2. Find the line:
+   ```
+   bind-address = 127.0.0.1
+   ```
+3. Change it to:
+   ```
+   bind-address = 0.0.0.0
+   ```
+4. Save and exit (`Ctrl + X`, then `Y`, then `Enter`).
+
+#### **Step 2: Restart MySQL Service**
+Run the following command to apply the changes:
+```bash
+sudo systemctl restart mysqld
+```
+or
+```bash
+sudo systemctl restart mysql
+```
+
+### **2. Create a Remote User in MySQL**
+1. Log in to MySQL on the **server**:
+   ```bash
+   mysql -u root -p
+   ```
+2. Create a user that can connect from another PC:
+   ```sql
+   CREATE USER 'remote_user'@'%' IDENTIFIED BY 'your_password';
+   GRANT ALL PRIVILEGES ON *.* TO 'remote_user'@'%' WITH GRANT OPTION;
+   FLUSH PRIVILEGES;
+   ```
+   - Replace `'remote_user'` with the desired username.
+   - Replace `'your_password'` with a strong password.
+3. If you want to allow only a specific IP (e.g., `192.168.1.100`), use:
+   ```sql
+   CREATE USER 'remote_user'@'192.168.1.100' IDENTIFIED BY 'your_password';
+   GRANT ALL PRIVILEGES ON *.* TO 'remote_user'@'192.168.1.100' WITH GRANT OPTION;
+   FLUSH PRIVILEGES;
+   ```
+
+### **3. Open MySQL Port in Firewall**
+1. Allow MySQL service through the firewall:
+   ```bash
+   sudo firewall-cmd --add-service=mysql --permanent
+   sudo firewall-cmd --reload
+   ```
+2. Or explicitly allow **port 3306**:
+   ```bash
+   sudo firewall-cmd --add-port=3306/tcp --permanent
+   sudo firewall-cmd --reload
+   ```
+3. Verify the port is open:
+   ```bash
+   sudo netstat -tulnp | grep 3306
+   ```
+   or
+   ```bash
+   ss -tulnp | grep 3306
+   ```
+
+### **4. Connect to MySQL from Another Computer**
+1. Install the MySQL client on the remote PC if not installed:
+   ```bash
+   sudo yum install mysql -y  # RHEL/CentOS
+   sudo apt install mysql-client -y  # Ubuntu/Debian
+   ```
+2. Connect to the MySQL server:
+   ```bash
+   mysql -u remote_user -p -h <SERVER_IP>
+   ```
+   Example:
+   ```bash
+   mysql -u remote_user -p -h 192.168.1.10
+   ```
+3. Enter the password when prompted.
+
+### **5. Troubleshooting**
+If you cannot connect:
+- Check if MySQL is running:
+  ```bash
+  sudo systemctl status mysqld
+  ```
+- Verify MySQL is listening on **0.0.0.0**:
+  ```bash
+  netstat -tulnp | grep 3306
+  ```
+- Ensure the firewall allows **port 3306**.
+- Check user privileges:
+  ```sql
+  SELECT * FROM mysql.user;
+  ```
+
+By following these steps, you should be able to access your MySQL database from another computer on the same network.
+
